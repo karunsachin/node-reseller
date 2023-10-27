@@ -56,7 +56,7 @@ app.get("/webhook", (req, res)=>{
   if (mode && token2){
 
     if (mode === "subcribe" && token2 === mytoken){
-      res.status(200).send(challenge) ;
+      res.status(200).send(JSON.stringify(challenge));
     }
     else{
       res.status(403);
@@ -96,7 +96,7 @@ app.post("/webhook", (req, res)=>{
       })
       .then((resp) => resp.json())
       .then((response) => {
-        res.status(200).send(response);
+        res.status(200).send(JSON.stringify(response));
       })
       .catch((err) => {
         res.status(404).send(err);
