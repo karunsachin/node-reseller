@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { response } from 'express';
 import fetch from 'node-fetch';
 import { config } from 'dotenv';
 const PORT = process.env.PORT || 5000;
@@ -45,6 +45,66 @@ app.get("/sendMessage", (req, res) => {
     })
     .catch(err => console.error(err));
 })
+
+app.get("/webhook", (req, res)=>{
+  let mode = req.query["hub.mode"];
+  let challenge = req.query["hub.challenge"];
+  let token2 = req.query["hub.verify_token"];
+
+  const mytoken="webhook_nodejs_token";
+
+  if (mode && token2){
+
+    if (mode === "subcribe" && token2 === mytoken){
+      res.status(200).send(challenge) ;
+    }
+    else{
+      res.status(403);
+    }
+  }
+})
+
+app.post("/webhook", (req, res)=>{
+  let body_param=req.body;
+  // console.log(JSON. stringify(body_param,null,2));
+  
+  if(body_param.object){
+    if(body_param.entry &&
+      body_param.entry[0].changes &&
+      body_param.entry[8].changes[0].value.message &&
+      body_param.entry[0].changes[0].value.message[0]
+    ){
+
+      let phon_no_id = body_param.entry[0].changes[0].value.metadata.phone_number_id;
+      let from = body_param.entry[0].changes[0].value.messages[0].from;
+      let msg_body = body_param.entry[0].changes[0].value.messages[0].text.body;
+
+      const data = {
+        messaging_product :"whatsapp",
+        to: from,
+        text :{
+          body :"Hello from webhook api...."
+        }
+      }
+
+        fetch("https://www.facebook.com/v18.0/" + phon_no_id + "/messages?access_token=" + token, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+      })
+      .then((resp) => resp.json())
+      .then((response) => {
+        res.status(200).send(response);
+      })
+      .catch((err) => {
+        res.status(404).send(err);
+      })
+    }
+  }
+})
+  
 
 app.listen(PORT, () => {
     console.log("Server Listening on PORT:", PORT);
