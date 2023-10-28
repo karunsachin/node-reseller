@@ -11,6 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const token = process.env.TOKEN;
 const Id = process.env.ID;
+const mytoken="webhook_nodejs_token";
 
 //create route
 app.get("/sendMessage", (req, res) => {
@@ -51,7 +52,6 @@ app.get("/webhook", (req, res)=>{
   let challenge = req.query["hub.challenge"];
   let token2 = req.query["hub.verify_token"];
 
-  const mytoken="webhook_nodejs_token";
 
   if (mode && token2){
 
